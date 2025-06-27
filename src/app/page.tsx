@@ -9,7 +9,7 @@ export default function Home() {
   const router = useRouter()
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((event,) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
       // Se o evento for SIGNED_IN, o usuário acabou de logar.
       if (event === 'SIGNED_IN') {
         router.push('/dashboard')
