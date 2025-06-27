@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+
 
 export default function DashboardPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
@@ -39,6 +41,11 @@ export default function DashboardPage() {
         <Button onClick={handleLogout} className="mt-4">
           Sair (Logout)
         </Button>
+        <Link href="/registrar-snap" passHref>
+        <Button variant="outline" className="mt-4">
+          Registrar Novo Snap
+        </Button>
+      </Link>
       </div>
     </main>
   )
