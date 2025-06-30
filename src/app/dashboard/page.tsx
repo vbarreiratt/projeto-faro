@@ -46,6 +46,12 @@ export default function DashboardPage() {
           Registrar Novo Snap
         </Button>
       </Link>
+      // Adicione este Link ao lado dos outros botões
+      <Link href="/galeria" passHref>
+        <Button variant="secondary" className="mt-4 ml-2">
+            Ver Galeria
+        </Button>
+      </Link>
       </div>
     </main>
   )
