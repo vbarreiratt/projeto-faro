@@ -10,7 +10,7 @@ const AuthForm = () => {
       <Auth
         supabaseClient={supabase}
         appearance={{ theme: ThemeSupa }}
-        providers={['github']} // Você pode adicionar 'google', 'twitter', etc.
+        providers={['github', 'google']} // Você pode adicionar 'google', 'twitter', etc.
         theme="dark"
       />
     </div>

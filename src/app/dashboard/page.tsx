@@ -1,58 +1,40 @@
-'use client'
-
-import { supabase } from '@/lib/supabaseClient'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
 
+export default async function DashboardPage() {
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
 
-export default function DashboardPage() {
-  const [userEmail, setUserEmail] = useState<string | null>(null)
-  const router = useRouter()
+  // 1. Pega os dados do usuário DA SESSÃO DO SERVIDOR
+  const { data: { user } } = await supabase.auth.getUser()
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setUserEmail(user.email || 'Não foi possível obter o email')
-      } else {
-        // Se não houver usuário, redireciona para a página de login
-        router.push('/')
-      }
-    }
-    fetchUser()
-  }, [router])
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
+  // 2. Se NÃO houver usuário, redireciona para o login ANTES de renderizar a página
+  if (!user) {
+    redirect('/')
   }
 
-  if (!userEmail) {
-    return <div>Carregando...</div>
+  // Função para fazer logout
+  const handleLogout = async () => {
+    'use server' // Indica que esta função roda no servidor
+    const cookieStore = cookies()
+    const supabase = createClient(cookieStore)
+    await supabase.auth.signOut()
+    return redirect('/')
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold">Bem-vindo!</h1>
-        <p className="mt-2">Você está logado com o email: {userEmail}</p>
-        <Button onClick={handleLogout} className="mt-4">
-          Sair (Logout)
-        </Button>
-        <Link href="/registrar-snap" passHref>
-        <Button variant="outline" className="mt-4">
-          Registrar Novo Snap
-        </Button>
-      </Link>
-      // Adicione este Link ao lado dos outros botões
-      <Link href="/galeria" passHref>
-        <Button variant="secondary" className="mt-4 ml-2">
-            Ver Galeria
-        </Button>
-      </Link>
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="p-8 bg-white rounded-lg shadow-md text-center">
+        <h1 className="text-2xl font-bold mb-4">Bem-vindo ao seu Dashboard!</h1>
+        <p className="mb-2">Você está logado como:</p>
+        <p className="font-mono bg-gray-200 p-2 rounded mb-6">{user.email}</p>
+        
+        <form action={handleLogout}>
+          <Button type="submit" variant="destructive">Logout</Button>
+        </form>
       </div>
-    </main>
+    </div>
   )
 }
