@@ -19,21 +19,27 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  // ===== NOVO CÓDIGO AQUI =====
-  // Este useEffect escuta por mudanças no estado de autenticação
+  // Escuta mudanças de autenticação e redireciona se o usuário já estiver logado
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      // Quando o evento é SIGNED_IN (login bem-sucedido), redireciona
-      if (event === 'SIGNED_IN' && session) {
-        router.push('/dashboard');
+    // Verifica se já existe uma sessão ativa
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        router.push('/dashboard')
       }
-    });
+    })
 
-    // Limpa a escuta quando o componente é desmontado
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        router.push('/dashboard')
+      }
+    })
+
     return () => {
-      subscription.unsubscribe();
-    };
-  }, [router, supabase]);
+      subscription.unsubscribe()
+    }
+  }, [router, supabase])
 
 
   const handleLogin = async (event: React.FormEvent) => {
@@ -52,7 +58,12 @@ export default function HomePage() {
 
   const handleSocialLogin = async (provider: 'google') => {
     setLoading(true)
-    const { error } = await supabase.auth.signInWithOAuth({ provider })
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${location.origin}/dashboard`,
+      },
+    })
     if (error) {
       setError(error.message)
       setLoading(false)
